@@ -4,9 +4,9 @@
 ## 使用しているEE技術
 
 * JAX-RS
-* CDI
 * JPA
 * Java API for JSON Processing
+* CDI/JTA
 
 ## 起動方法
 
