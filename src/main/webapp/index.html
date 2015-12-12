@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Semicolonless TODO Application</title>
+<script src="webjars/superagent/1.4.0/superagent.min.js"></script>
+<script src="webjars/knockout/3.4.0/knockout.js"></script>
+</head>
+<body>
+
+	<p>
+		<input type="text" data-bind="value: content"> <input
+			type="button" value="Create New TODO" data-bind="click: create">
+	</p>
+
+	<ul data-bind="foreach: todoList">
+		<li
+			data-bind="style: { textDecoration : done() ? 'line-through' : 'none' }"><input
+			type="checkbox" data-bind="checked: done(), click: toggle"> <span
+			data-bind="text: content"></span></li>
+	</ul>
+
+	<script>
+		function refresh() {
+			superagent.get('api/todo/list').end(function(err, res) {
+				model.todoList.removeAll()
+				JSON.parse(res.text).forEach(function(todo) {
+					var a = {
+						content : todo.content,
+						done : ko.observable(todo.done),
+						toggle : function() {
+							superagent.post('api/todo/update').send({
+								id : todo.id,
+								done : !a.done()
+							}).end(function() {
+								refresh()
+							})
+						}
+					}
+					model.todoList.push(a)
+				})
+			})
+		}
+
+		var model = {
+			content : ko.observable(""),
+			todoList : ko.observableArray([]),
+			create : function() {
+				superagent.post('api/todo/create').send({
+					content : model.content()
+
+				}).end(function() {
+					model.content('')
+
+					refresh()
+				})
+			}
+		}
+
+		ko.applyBindings(model)
+
+		refresh()
+	</script>
+</body>
+</html>
