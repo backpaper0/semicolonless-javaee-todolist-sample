@@ -70,22 +70,18 @@ public class TodoResource {
 
     private void run(
             java.util.function.Consumer<java.util.stream.Stream<javax.persistence.EntityManager>> action) {
-        if (java.util.stream.Stream
-                .of((javax.persistence.EntityManager) ((java.util.function.Supplier) java.lang.reflect.Proxy
-                        .newProxyInstance(getClass().getClassLoader(),
-                                new Class[] {
-                                        java.util.function.Supplier.class },
-                                (proxy, method,
-                                        args) -> javax.naming.InitialContext
-                                                .doLookup(
-                                                        "java:comp/env/TodoEM")))
-                                                                .get())
-                .peek(em -> em
-                        .createNativeQuery(
-                                "create table if not exists todo (id identity, content varchar(1000), done boolean default(false))")
-                        .executeUpdate())
-                .peek(em -> action.accept(java.util.stream.Stream.of(em)))
-                .count() > 0) {
+        try {
+            if (java.util.stream.Stream
+                    .of((javax.persistence.EntityManager) javax.naming.InitialContext
+                            .doLookup("java:comp/env/TodoEM"))
+                    .peek(em -> em
+                            .createNativeQuery(
+                                    "create table if not exists todo (id identity, content varchar(1000), done boolean default(false))")
+                            .executeUpdate())
+                    .peek(em -> action.accept(java.util.stream.Stream.of(em)))
+                    .count() > 0) {
+            }
+        } catch (javax.naming.NamingException e) {
         }
     }
 }
